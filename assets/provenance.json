@@ -1,0 +1,13 @@
+{
+  "provider": "Agnes",
+  "model": "agnes-image-2.1-flash",
+  "generation_task": "task_vW6XN0dZQ8jVxINh9lCYAkqaRT3IuVf7",
+  "source_url": "https://platform-outputs.agnes-ai.space/images/t2i/task_vW6XN0dZQ8jVxINh9lCYAkqaRT3IuVf7/output_5fff77ab643b460988d121468dd5ce1f.png",
+  "prompt": "Create a polished bright Windows desktop utility application icon for TrayKit, a compact toolbox that restores clipboard images across remote desktops. One simple cyan and azure rounded toolbox silhouette combined with a small white clipboard photo tile and a yellow lightning accent. Bold large shapes, joyful bright colors, clean vector-like edges, no text, no letters, no watermark, centered composition with generous clear padding, plain white background, legible at 16 by 16 pixels. Square app icon.",
+  "postprocessing": "Pillow Lanczos resize; ICO 16,20,24,32,40,48,64,128,256",
+  "sha256": {
+    "traykit-source.png": "038ca66e23644150404763344049430822b232e63fb70f01bcc03a6c4881c7a3",
+    "traykit.png": "242034cd3ec254ec688860e5c3bc0a02b243a2f0ef0fd907723e5ad685011054",
+    "traykit.ico": "6013488544268f6c7d5ecef36aec9e2f9681d506ecc0ca23a3af1a22341cd239"
+  }
+}

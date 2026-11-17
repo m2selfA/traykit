@@ -1,0 +1,9 @@
+/target
+
+# Local agent planning state; release behavior lives in README/VERIFICATION.
+/task_plan.md
+/findings.md
+/progress.md
+
+# Raw generation response is superseded by assets/provenance.json.
+/assets/agnes-response.json
