@@ -101,11 +101,12 @@ Preview, cancellation, typed pipelines, external scripts and third-party plugins
 - `traykit-X.Y.Z-windows-x64.zip`
 - `SHA256SUMS.txt`
 
-The files are uploaded as a 30-day Actions artifact and attached to a GitHub Release. Normal branch pushes and pull requests do not trigger this workflow. To release the current version:
+The files are uploaded as a 30-day Actions artifact and attached to a GitHub Release. Normal branch pushes and pull requests do not trigger this workflow. After bumping and committing all version sources, create the matching release tag:
 
 ```powershell
-git tag -a v0.3.3 -m "TrayKit 0.3.3"
-git push origin v0.3.3
+$Version = "0.3.4"
+git tag -a "v$Version" -m "TrayKit $Version"
+git push origin "v$Version"
 ```
 
 ## Verification

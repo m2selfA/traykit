@@ -43,6 +43,24 @@ The canonical 0.3.3 executable was deployed to `C:/Users/inter/Desktop/CD/trayki
 - The upload temporary file was removed, no TrayKit process remained, and the application was not auto-started.
 - Local deployment receipt: `target/verification/0.3.3/deployment-imini.json` (release evidence, ignored with `target/`).
 
+## GitHub publication and tag release (0.3.3)
+
+The repository is public at <https://github.com/m2selfA/traykit>. `main` is the default branch and the local branch tracks `origin/main`.
+
+The `v0.3.3` annotated tag dereferences to commit `ae98c287e3993435945aaf0d23d14402cb71296f`. It triggered the only workflow run created by publication; ordinary `main` pushes created no runs. Run [44116474117](https://github.com/m2selfA/traykit/actions/runs/44116474117) completed successfully on `windows-latest` after the x64 host/tag-version gate, formatting, strict Clippy, 26 tests, release build, PE/resource verification, packaging, artifact upload, and GitHub Release publication.
+
+Release: <https://github.com/m2selfA/traykit/releases/tag/v0.3.3>
+
+- `traykit-0.3.3-windows-x64.exe`: SHA-256 `eb9b8762887cb5f8ff129f1c822cfdcb0da92b57a9f40660c5019aa85f5ebb4a`, PE machine `0x8664`, FileVersion/ProductVersion 0.3.3.
+- `traykit-0.3.3-windows-x64.zip`: SHA-256 `9f36a7ac6ea105856b6117abfae4261403cc0e221446ade162ec5ddd62293eb2`.
+- `SHA256SUMS.txt`: SHA-256 `01e06997637daeceec94427ea59d7571d10c8a3608b6bbf487a590aafbd69de6`.
+- The ZIP contains `LICENSE`, `README.md`, and `traykit.exe`; the inner EXE hash equals the standalone Release EXE.
+- The independently downloaded Actions artifact matches all three GitHub Release assets byte-for-byte.
+
+The successful first run reported a Node.js 20 deprecation annotation from the then-pinned `checkout@v4` and `upload-artifact@v4`. This did not invalidate its build outputs, but the warning was not left as the active configuration. Commit `d5052f1` updated future runs to API-resolved fixed commits for `checkout@v5` and `upload-artifact@v6`; their official `action.yml` files declare `node24`. The published `v0.3.3` tag was not moved or rewritten, preserving its provenance. The Node24 configuration is static-confirmed and parsed as active by GitHub; its first live execution belongs to the next version tag.
+
+The GitHub-built EXE is an independent build and is not relabeled as the local canonical/deployed binary `5d1c...dcf7`; both provenance lines retain their own hashes.
+
 ## Historical canonical artifact (0.3.2 hotkey capture)
 
 - Executable SHA-256: `a02a1404273fe40fbf7398d03a9e1cf313d64c9bc3f1dbd3bdc9373fcdbc468b`; 2,759,680 bytes.
