@@ -1,4 +1,5 @@
 /target
+/dist
 
 # Local agent planning state; release behavior lives in README/VERIFICATION.
 /task_plan.md

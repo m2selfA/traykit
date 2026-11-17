@@ -93,6 +93,21 @@ src/
 
 Preview, cancellation, typed pipelines, external scripts and third-party plugins are not implemented in 0.3.3. All current descriptors therefore report `supports_preview = false` and `supports_cancel = false`.
 
+## GitHub release automation
+
+`.github/workflows/release-windows-x64.yml` runs only for pushed tags beginning with `v`. The job rejects a tag unless it exactly matches the Cargo package version (`vX.Y.Z`) and the runner host is `x86_64-pc-windows-msvc`. It runs formatting, strict Clippy, unit tests, release compilation, and PE/resource verification before producing:
+
+- `traykit-X.Y.Z-windows-x64.exe`
+- `traykit-X.Y.Z-windows-x64.zip`
+- `SHA256SUMS.txt`
+
+The files are uploaded as a 30-day Actions artifact and attached to a GitHub Release. Normal branch pushes and pull requests do not trigger this workflow. To release the current version:
+
+```powershell
+git tag -a v0.3.3 -m "TrayKit 0.3.3"
+git push origin v0.3.3
+```
+
 ## Verification
 
 ```powershell

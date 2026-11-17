@@ -4,6 +4,7 @@ version = "0.3.3"
 edition = "2024"
 description = "A quiet Windows tray toolbox with in-memory clipboard image repair"
 license = "MIT"
+repository = "https://github.com/m2selfA/traykit"
 build = "build.rs"
 
 [dependencies]

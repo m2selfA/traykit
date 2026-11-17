@@ -1,0 +1,116 @@
+name: Release Windows x64
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows-x64:
+    name: Build Windows x64
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify x64 toolchain and release tag
+        id: metadata
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          rustup component add rustfmt clippy
+          $hostTriple = ((rustc -vV | Select-String "^host:").Line -split ":", 2)[1].Trim()
+          if ($hostTriple -ne "x86_64-pc-windows-msvc") {
+            throw "Expected x86_64-pc-windows-msvc, got $hostTriple"
+          }
+          $metadata = cargo metadata --no-deps --locked --format-version 1 | ConvertFrom-Json
+          $package = @($metadata.packages | Where-Object name -eq "traykit")
+          if ($package.Count -ne 1) {
+            throw "Expected exactly one traykit package"
+          }
+          $version = $package[0].version
+          if ($env:GITHUB_REF_NAME -ne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME must match Cargo version v$version"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Run release gates
+        run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets --all-features -- -D warnings
+          cargo test --locked
+          cargo build --release --locked
+          python -m pip install --disable-pip-version-check pefile==2024.8.26
+          python scripts/verify-resources.py
+
+      - name: Package release assets
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = "${{ steps.metadata.outputs.version }}"
+          $dist = Join-Path $PWD "dist"
+          $bundle = Join-Path $dist "bundle"
+          New-Item -ItemType Directory -Force $bundle | Out-Null
+          Copy-Item "target/release/traykit.exe" (Join-Path $dist "traykit-$version-windows-x64.exe")
+          Copy-Item "target/release/traykit.exe" (Join-Path $bundle "traykit.exe")
+          Copy-Item "README.md", "LICENSE" $bundle
+          Compress-Archive -Path "$bundle/*" -DestinationPath (Join-Path $dist "traykit-$version-windows-x64.zip") -CompressionLevel Optimal
+          Remove-Item $bundle -Recurse -Force
+          $files = @(
+            "traykit-$version-windows-x64.exe",
+            "traykit-$version-windows-x64.zip"
+          )
+          $checksums = foreach ($file in $files) {
+            $hash = (Get-FileHash (Join-Path $dist $file) -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $file"
+          }
+          $checksums | Set-Content (Join-Path $dist "SHA256SUMS.txt") -Encoding ascii
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: traykit-${{ steps.metadata.outputs.version }}-windows-x64
+          path: |
+            dist/traykit-${{ steps.metadata.outputs.version }}-windows-x64.exe
+            dist/traykit-${{ steps.metadata.outputs.version }}-windows-x64.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = "${{ steps.metadata.outputs.version }}"
+          $tag = $env:GITHUB_REF_NAME
+          $assets = @(
+            "dist/traykit-$version-windows-x64.exe#TrayKit $version Windows x64 executable",
+            "dist/traykit-$version-windows-x64.zip#TrayKit $version Windows x64 package",
+            "dist/SHA256SUMS.txt#SHA-256 checksums"
+          )
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          $releaseExists = $LASTEXITCODE -eq 0
+          if ($releaseExists) {
+            gh release upload $tag @assets --clobber --repo $env:GITHUB_REPOSITORY
+          } else {
+            gh release create $tag @assets --verify-tag --generate-notes --title "TrayKit $version" --repo $env:GITHUB_REPOSITORY
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub Release publication failed"
+          }
